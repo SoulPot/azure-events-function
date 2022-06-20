@@ -26,7 +26,6 @@ const IoTHubTrigger: AzureFunction = async function (context: Context, IoTHubMes
             if (!err) {
                 IoTHubMessages.forEach(async message => {
                     if (message.device_id !== undefined) {
-                        context.log("-------------FIRESTORE");
                         client.publish(`${topic}/${message.device_id}`, JSON.stringify(message));
                         const analyzer: IAnalyzer = {
                             battery: 0,
