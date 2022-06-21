@@ -3,6 +3,7 @@ export interface IAnalyzer {
     humidity: number;
     luminosity: number;
     temperature: number;
-    plantId?: string;
-    userId?: string;
+    plantID?: string;
+    userID?: string;
+    wifiName?: string;
 }
