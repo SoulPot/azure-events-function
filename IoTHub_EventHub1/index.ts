@@ -4,6 +4,11 @@ import { addDoc, collection, doc, getDoc, getDocs, getFirestore, setDoc } from "
 import * as mqtt from "mqtt";
 import { IAnalyzer } from './Interfaces/IAnalyzer';
 
+const MQTT_HOST = 'mqtt://alesia-julianitow.ovh:9443'
+const MQTT_USERNAME = 'soulpot';
+const MQTT_PASSWORD = 'soulpot';
+const MQTT_CLIENT_ID = 'Azure_IoT_Events';
+
 export const app = initializeApp({
     apiKey: 'AIzaSyC6G7wA478gT6rgWgcvYxavAHx9-r2dI',
     authDomain: 'soulpot-5fbe6.firebaseapp.com',
@@ -17,7 +22,7 @@ const months = ["jan", 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', '
 const IoTHubTrigger: AzureFunction = async function (context: Context, IoTHubMessages: any[]): Promise<void> {
     context.log(IoTHubMessages);
 
-    const client = mqtt.connect('mqtt://alesia-julianitow.ovh:9443');
+    const client = mqtt.connect(MQTT_HOST, { username: MQTT_USERNAME, password: MQTT_PASSWORD, clientId: MQTT_CLIENT_ID});
     const topic = 'events';
     const today = new Date();
     const day = today.getDate() < 10 ? `0${today.getDate()}` : today.getDate();
@@ -32,7 +37,7 @@ const IoTHubTrigger: AzureFunction = async function (context: Context, IoTHubMes
     });
 
     const hum: number = +message.data.hygro;
-    const lum: number = message.data.lum == "nan" ? 0 : +message.data.lum;
+    const lum: number = +message.data.lum;
     const temp: number = +message.data.temp;
     const analyzer: IAnalyzer = {
         battery: 0,
@@ -45,20 +50,31 @@ const IoTHubTrigger: AzureFunction = async function (context: Context, IoTHubMes
         const _doc = doc(firestore, "analyzers", `${message.device_id}`);
         const previousDoc = await getDoc(_doc);
         const previousData = previousDoc.data() as unknown as IAnalyzer;
+
+        if (previousData.userID === undefined) {
+            throw Error('No userId found in Firstore');
+        }
+
         analyzer.plantID = previousData.plantID;
         analyzer.userID = previousData.userID;
         analyzer.wifiName = previousData.wifiName;
+        analyzer.name = previousData.name
+
         await setDoc(_doc, analyzer);
         const logsRef = doc(firestore, "analyzers", `${message.device_id}`, 'logs', logId);
         await setDoc(logsRef, analyzer);
     } catch(err) {
         context.log(err);
+        return;
     }
+
+    context.log(analyzer);
 
     client.on('connect', () => {
         client.subscribe(topic, (err: Error) => {
             if (!err) {
                 client.publish(`${topic}/${message.device_id}`, JSON.stringify(message));
+                client.end();
             } else {
                 context.log(err.message);
             }
