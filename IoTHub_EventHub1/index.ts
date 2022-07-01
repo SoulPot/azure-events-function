@@ -28,8 +28,8 @@ const IoTHubTrigger: AzureFunction = async function (context: Context, IoTHubMes
     const day = today.getDate() < 10 ? `0${today.getDate()}` : today.getDate();
     const month = today.getMonth() + 1 < 10 ? `0${today.getMonth() + 1}` : today.getMonth() + 1;
     const minutes = today.getMinutes() < 10 ? `0${today.getMinutes()}`: today.getMinutes();
-    const logId = `${months[today.getMonth()]}_${day}_${today.getFullYear()}_${today.getHours()}_${minutes}`;
-    const dateAttr = `${day}/${month}/${today.getFullYear()} ${today.getHours()}:${minutes}`;
+    const logId = `${months[today.getMonth()]}_${day}_${today.getFullYear()}_${today.getHours() + 2}_${minutes}`;
+    const dateAttr = `${day}/${month}/${today.getFullYear()} ${today.getHours() + 2}:${minutes}`;
     let message;
 
     IoTHubMessages.forEach(async msg => {
