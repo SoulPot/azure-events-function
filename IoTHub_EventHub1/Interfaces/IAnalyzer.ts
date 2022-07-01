@@ -1,5 +1,6 @@
 export interface IAnalyzer {
-    battery: number;
+    battery?: number;
+    dateTime: String;
     humidity: number;
     luminosity: number;
     name?: string;

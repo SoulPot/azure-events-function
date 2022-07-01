@@ -26,8 +26,10 @@ const IoTHubTrigger: AzureFunction = async function (context: Context, IoTHubMes
     const topic = 'events';
     const today = new Date();
     const day = today.getDate() < 10 ? `0${today.getDate()}` : today.getDate();
+    const month = today.getMonth() + 1 < 10 ? `0${today.getMonth() + 1}` : today.getMonth() + 1;
     const minutes = today.getMinutes() < 10 ? `0${today.getMinutes()}`: today.getMinutes();
     const logId = `${months[today.getMonth()]}_${day}_${today.getFullYear()}_${today.getHours()}_${minutes}`;
+    const dateAttr = `${day}/${month}/${today.getFullYear()} ${today.getHours()}:${minutes}`;
     let message;
 
     IoTHubMessages.forEach(async msg => {
@@ -40,7 +42,8 @@ const IoTHubTrigger: AzureFunction = async function (context: Context, IoTHubMes
     const lum: number = +message.data.lum;
     const temp: number = +message.data.temp;
     const analyzer: IAnalyzer = {
-        battery: 0,
+        // battery: 0,
+        dateTime: dateAttr,
         humidity: hum,
         luminosity:lum,
         temperature: temp,
